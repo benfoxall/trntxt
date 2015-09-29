@@ -5,7 +5,7 @@ var data = {
 	labels: ["Yesterday", "Today"],
 	datasets: [
 		{
-			data:hits
+			data:[stats.hitCountYesterday, stats.hitCountToday]
 		}
 	]
 }
