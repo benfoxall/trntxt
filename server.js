@@ -3,11 +3,13 @@ var extend = require('extend');
 var jade = require('jade');
 var uaParser = require('ua-parser-js');
 var mongoose = require('mongoose');
+var prettify = require('json-pretty');
 var util = require('util');
 var config = require('./src/trntxtconfig.js');
 var iconGenerator = require('./src/iconGenerator.js');
 var schema = require('./src/mongoSchemas.js')(mongoose);
 var nr = require('./src/nationalrail.js');
+var trntxtstats = require('./src/trntxtstats.js');
 
 var app = express();
 mongoose.connect(config.dbString);
@@ -26,6 +28,11 @@ var jadeGlobals = {pageTitle:'trntxt'};
 
 function compile(locals) {
 	var fn = jade.compileFile('resources/template.jade', jadeOptions);
+	return fn(extend({}, jadeGlobals, locals));
+}
+
+function statsPage(locals) {
+	var fn = jade.compileFile('resources/stats.jade', jadeOptions);
 	return fn(extend({}, jadeGlobals, locals));
 }
 
@@ -74,6 +81,21 @@ function getStationsFromRequest(request) {
 app.get('/defaultsite', function(request, response) {
 	response.sendFile('index.html', {root:'./public'});
 });
+
+app.get('/stats', function(request, response) {
+	console.log('getting stats')
+	if (!connected) response.send('Not connected to the database yet');
+	console.log('connected')
+	trntxtstats(Hit, function(err, data) {
+		if (err) return response.send('Some error happened', err);
+		// response.send(prettify(data));
+		data.hitsTodayFormatted = prettify(data.hitsToday)
+		var locals = {
+			stats: data
+		}
+		response.send(statsPage(locals));
+	})
+})
 
 // Regex matches letters (no dots), ? means 'to' is optional
 app.get('/:from(\\w+)/:to(\\w+)?', function (request, response) {

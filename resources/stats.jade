@@ -1,0 +1,20 @@
+html
+	head
+		include head.jade
+	body
+		include header.jade
+		h2 Stats page WOOO
+		p= stats.hitCountToday
+		p= stats.hitCountYesterday
+		
+		canvas(id="myChart" width="400" height="400")
+		
+		//- p
+		//- 	pre= stats.hitsTodayFormatted
+		script(src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js")
+		script(src="https://code.jquery.com/jquery-2.1.4.min.js")
+		script
+			= "var hits = [" + stats.hitCountYesterday + ", " + stats.hitCountToday + "];"
+		script
+			include stats.js
+		include footer.jade
